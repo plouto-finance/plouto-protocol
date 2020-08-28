@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0;
 
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 contract PLU is ERC20, ERC20Detailed {
   using Address for address;
@@ -17,22 +19,22 @@ contract PLU is ERC20, ERC20Detailed {
   }
 
   function mint(address account, uint amount) public {
-	require(minters[msg.sender], "!minter");
-	_mint(account, amount);
+	  require(minters[msg.sender], "!minter");
+	  _mint(account, amount);
   }
   
   function setGovernance(address _governance) public {
-	require(msg.sender == governance, "!governance");
-	governance = _governance;
+	  require(msg.sender == governance, "!governance");
+	  governance = _governance;
   }
   
   function addMinter(address _minter) public {
-	require(msg.sender == governance, "!governance");
-	minters[_minter] = true;
+	  require(msg.sender == governance, "!governance");
+	  minters[_minter] = true;
   }
   
   function removeMinter(address _minter) public {
-	require(msg.sender == governance, "!governance");
-	minters[_minter] = false;
+	  require(msg.sender == governance, "!governance");
+	  minters[_minter] = false;
   }
 }
