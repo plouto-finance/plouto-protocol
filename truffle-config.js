@@ -1,9 +1,10 @@
 require('dotenv-flow').config();
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const ropstenMnemonic = process.env.ROPSTEN_MNEMONIC;
+const testnetMnemonic = process.env.TESTNET_MNEMONIC;
 const mainnetMnemonic = process.env.MAINNET_MNEMONIC;
 const gasPrice = process.env.GAS_PRICE;
 const ropstenInfura = 'https://ropsten.infura.io/v3/5ce8fba73cc94be581a3c488ebd5efee';
+const kovanInfura = 'https://kovan.infura.io/v3/5ce8fba73cc94be581a3c488ebd5efee';
 const mainnetInfura = 'https://mainnet.infura.io/v3/5ce8fba73cc94be581a3c488ebd5efee';
 
 module.exports = {
@@ -21,9 +22,15 @@ module.exports = {
    },
    ropsten: {
     provider: function() {
-      return new HDWalletProvider(ropstenMnemonic, ropstenInfura);
+      return new HDWalletProvider(testnetMnemonic, ropstenInfura);
     },
     network_id: 3
+   },
+   kovan: {
+    provider: function() {
+      return new HDWalletProvider(testnetMnemonic, kovanInfura);
+    },
+    network_id: 42
    },
    mainnet: { // 发布前需要根据当前主网燃气费修改配置
     provider: function() {
