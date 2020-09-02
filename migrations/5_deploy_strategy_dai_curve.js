@@ -1,38 +1,24 @@
 const Controller = artifacts.require('Controller');
-const Vault = artifacts.require('Vault');
+const StrategyDAICurve = artifacts.require('StrategyDAICurve');
 
 module.exports = async function(deployer, network) {
   await deployer;
+  await deployer.deploy(StrategyDAICurve, Controller.address);
   if (network.includes('ropsten')) {
-    await deployer.deploy(
-      Vault,
-      '0xADeD4B66783099E174a17b74E698aeFA0fd8f19d',
-      Controller.address,
-      150);
     const contractInstance = await deployer.deploy(Controller, { overwrite: false });
-    await contractInstance.setVault(
+    await contractInstance.setStrategy(
       '0xADeD4B66783099E174a17b74E698aeFA0fd8f19d',
-      Vault.address);
+      StrategyDAICurve.address);
     return;
   } else if (network.includes('kovan')) {
-    await deployer.deploy(
-      Vault,
-      '0x5075a70f5c86a4132e57fcea857c0c1d87e43093',
-      Controller.address,
-      150);
     const contractInstance = await deployer.deploy(Controller, { overwrite: false });
-    await contractInstance.setVault(
+    await contractInstance.setStrategy(
       '0x5075a70f5c86a4132e57fcea857c0c1d87e43093',
-      Vault.address);
+      StrategyDAICurve.address);
     return;
   }
-  await deployer.deploy(
-    Vault,
-    '0x6b175474e89094c44da98b954eedeac495271d0f',
-    Controller.address,
-    150);
   const contractInstance = await deployer.deploy(Controller, { overwrite: false });
-  await contractInstance.setVault(
+  await contractInstance.setStrategy(
     '0x6b175474e89094c44da98b954eedeac495271d0f',
-    Vault.address);
+    StrategyDAICurve.address);
 };
