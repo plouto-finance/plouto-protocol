@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 
 contract PLU is ERC20, ERC20Detailed {
   using Address for address;
@@ -15,7 +16,7 @@ contract PLU is ERC20, ERC20Detailed {
   mapping (address => bool) public minters;
 
   constructor () public ERC20Detailed("plouto.finance", "PLU", 18) {
-    governance = msg.sender;
+    governance = tx.origin;
   }
 
   function mint(address account, uint amount) public {
