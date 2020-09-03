@@ -13884,12 +13884,12 @@
         }
       },
       "links": {},
-      "address": "0x4eA816832913155B148fE8E33Cd4A5Fb33B71a6e",
-      "transactionHash": "0xaf2d76b5e25fd9643c7f8d1ab80a8b2d61a73fb87acabe95f822b5be535af1cd"
+      "address": "0x291779e82EF8A73E6D1F63094499C929337049f5",
+      "transactionHash": "0x7073f01ba141f114979929c1f9593f3ddad415a5bb9da25f8287dd345a6fead0"
     }
   },
   "schemaVersion": "3.2.4",
-  "updatedAt": "2020-09-02T11:58:40.887Z",
+  "updatedAt": "2020-09-03T02:50:44.569Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {
