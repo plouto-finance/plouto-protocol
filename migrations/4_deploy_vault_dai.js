@@ -7,8 +7,7 @@ module.exports = async function(deployer, network) {
     await deployer.deploy(
       Vault,
       '0xADeD4B66783099E174a17b74E698aeFA0fd8f19d',
-      Controller.address,
-      150);
+      Controller.address);
     const contractInstance = await deployer.deploy(Controller, { overwrite: false });
     await contractInstance.setVault(
       '0xADeD4B66783099E174a17b74E698aeFA0fd8f19d',
@@ -18,8 +17,7 @@ module.exports = async function(deployer, network) {
     await deployer.deploy(
       Vault,
       '0x5075a70f5c86a4132e57fcea857c0c1d87e43093',
-      Controller.address,
-      150);
+      Controller.address);
     const contractInstance = await deployer.deploy(Controller, { overwrite: false });
     await contractInstance.setVault(
       '0x5075a70f5c86a4132e57fcea857c0c1d87e43093',
@@ -29,8 +27,7 @@ module.exports = async function(deployer, network) {
   await deployer.deploy(
     Vault,
     '0x6b175474e89094c44da98b954eedeac495271d0f',
-    Controller.address,
-    150);
+    Controller.address);
   const contractInstance = await deployer.deploy(Controller, { overwrite: false });
   await contractInstance.setVault(
     '0x6b175474e89094c44da98b954eedeac495271d0f',

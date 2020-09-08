@@ -25,14 +25,14 @@ module.exports = {
       return new HDWalletProvider(testnetMnemonic, ropstenInfura);
     },
     network_id: 3,
-    gas: 6000000
+    gas: 4000000
    },
    kovan: {
     provider: function() {
       return new HDWalletProvider(testnetMnemonic, kovanInfura);
     },
     network_id: 42,
-    gas: 6000000
+    gas: 4000000
    },
    mainnet: { // 发布前需要根据当前主网燃气费修改配置
     provider: function() {

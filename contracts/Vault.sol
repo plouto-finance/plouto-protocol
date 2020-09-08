@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-interface IController {
+interface VaultController {
   function withdraw(address, uint) external;
   function balanceOf(address) external view returns (uint);
   function earn(address, uint) external;
@@ -23,24 +23,21 @@ contract Vault is ERC20, ERC20Detailed {
   uint public min = 9500;
   uint public constant max = 10000;
 
-  uint public earnThreshold;
-
   address public governance;
   address public controller;
 
-  constructor (address _token, address _controller, uint _earnThreshold) public ERC20Detailed(
+  constructor (address _token, address _controller) public ERC20Detailed(
     string(abi.encodePacked("plouto ", ERC20Detailed(_token).name())),
-    string(abi.encodePacked("plu", ERC20Detailed(_token).symbol())),
+    string(abi.encodePacked("p", ERC20Detailed(_token).symbol())),
     ERC20Detailed(_token).decimals()
   ) {
     token = IERC20(_token);
-    earnThreshold = _earnThreshold * 1e18;
     governance = tx.origin;
     controller = _controller;
   }
 
   function balance() public view returns (uint) {
-    return token.balanceOf(address(this)).add(IController(controller).balanceOf(address(token)));
+    return token.balanceOf(address(this)).add(VaultController(controller).balanceOf(address(token)));
   }
 
   function setMin(uint _min) external {
@@ -58,11 +55,6 @@ contract Vault is ERC20, ERC20Detailed {
     controller = _controller;
   }
 
-  function setEarnThreshold(uint256 _earnThreshold) public {
-    require(msg.sender == governance, "!governance");
-    earnThreshold = _earnThreshold * 1e18;
-  }
-
   // Custom logic in here for how much the vault allows to be borrowed
   // Sets minimum required on-hand to keep small withdrawals cheap
   function available() public view returns (uint) {
@@ -72,7 +64,7 @@ contract Vault is ERC20, ERC20Detailed {
   function earn() public {
     uint _bal = available();
     token.safeTransfer(controller, _bal);
-    IController(controller).earn(address(token), _bal);
+    VaultController(controller).earn(address(token), _bal);
   }
 
   function depositAll() external {
@@ -92,9 +84,6 @@ contract Vault is ERC20, ERC20Detailed {
       shares = (_amount.mul(totalSupply())).div(_pool);
     }
     _mint(msg.sender, shares);
-    if (token.balanceOf(address(this)) > earnThreshold) {
-      earn();
-    }
   }
 
   function withdrawAll() external {
@@ -110,7 +99,7 @@ contract Vault is ERC20, ERC20Detailed {
     uint b = token.balanceOf(address(this));
     if (b < r) {
       uint _withdraw = r.sub(b);
-      IController(controller).withdraw(address(token), _withdraw);
+      VaultController(controller).withdraw(address(token), _withdraw);
       uint _after = token.balanceOf(address(this));
       uint _diff = _after.sub(b);
       if (_diff < _withdraw) {

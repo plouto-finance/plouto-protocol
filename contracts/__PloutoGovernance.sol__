@@ -2,8 +2,8 @@
 pragma solidity >=0.5.0;
 
 import "@openzeppelin/contracts/math/Math.sol";
-import "./CurveRewards.sol";
 import "./IRewardDistributionRecipient.sol";
+import "./LPTokenWrapper.sol";
 
 /*
    ____            __   __        __   _
