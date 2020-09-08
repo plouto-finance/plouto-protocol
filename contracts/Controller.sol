@@ -145,7 +145,7 @@ contract Controller {
   }
 
   // Only allows to withdraw non-core strategy tokens ~ this is over and above normal yield
-  function yearn(address _strategy, address _token, uint parts) public {
+  function pearn(address _strategy, address _token, uint parts) public {
     // This contract should never have value in it, but just incase since this is a public call
     uint _before = IERC20(_token).balanceOf(address(this));
     IStrategy(_strategy).withdraw(_token);
