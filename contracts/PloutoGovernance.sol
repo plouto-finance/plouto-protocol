@@ -49,8 +49,8 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
 
   function seize(IERC20 _token, uint amount) external {
     require(msg.sender == governance, "!governance");
-    require(_token != token, "reward");
-    require(_token != vote, "vote");
+    require(_token != plu, "reward");
+    require(_token != lp, "lp");
     _token.safeTransfer(governance, amount);
   }
 
@@ -61,6 +61,13 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
   function setBreaker(bool _breaker) external {
     require(msg.sender == governance, "!governance");
     breaker = _breaker;
+  }
+
+  uint public minimumBPTLP = 1000e18;
+
+  function setMinimumBPTLP(uint _minimum) public {
+    require(msg.sender == governance, "!governance");
+    minimumBPTLP = _minimum;
   }
 
   /* Modifications for proposals */
@@ -90,9 +97,15 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
   uint public lock = 17280; // vote lock in blocks ~ 17280 3 days for 15s/block
   uint public minimum = 1e18;
   uint public quorum = 2000;
-  bool public config = true;
 
   address public governance;
+
+  constructor (address _bptlp, address _plu) public LPTokenWrapper(_plu) {
+    governance = tx.origin;
+    proposalCount = 0;
+    bptlp = IERC20(_bptlp);
+    plu = IERC20(_plu);
+  }
 
   function setGovernance(address _governance) public {
     require(msg.sender == governance, "!governance");
@@ -117,13 +130,6 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
   function setLock(uint _lock) public {
     require(msg.sender == governance, "!governance");
     lock = _lock;
-  }
-
-  function initialize(uint id) public {
-    require(config == true, "!config");
-    config = false;
-    proposalCount = id;
-    governance = 0xc487E91aac75D048EeACA7360E479Ae7cCEa0b86;
   }
 
   event NewProposal(uint id, address creator, uint start, uint duration, address executor);
@@ -266,9 +272,10 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
 
   /* Default rewards contract */
 
-  IERC20 public token = IERC20(0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8);
+  IERC20 public bptlp;
+  IERC20 public plu;
 
-  uint256 public constant DURATION = 7 days;
+  uint256 public constant DURATION = 60 days;
 
   uint256 public periodFinish = 0;
   uint256 public rewardRate = 0;
@@ -321,6 +328,10 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
   // stake visibility is public as overriding LPTokenWrapper's stake() function
   function stake(uint256 amount) public updateReward(msg.sender) {
     require(amount > 0, "Cannot stake 0");
+    if (breaker == false) {
+      require(bptlp.balanceOf(msg.sender) > minimumBPTLP, "<minimumBPTLP");
+      require(voteLock[msg.sender] > block.number, "<block.number");
+    }
     if (voters[msg.sender] == true) {
       votes[msg.sender] = votes[msg.sender].add(amount);
       totalVotes = totalVotes.add(amount);
@@ -349,18 +360,18 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
 
   function getReward() public updateReward(msg.sender) {
     if (breaker == false) {
+      require(bptlp.balanceOf(msg.sender) > minimum, "<minimum");
       require(voteLock[msg.sender] > block.number,"!voted");
     }
     uint256 reward = earned(msg.sender);
     if (reward > 0) {
       rewards[msg.sender] = 0;
-      token.safeTransfer(msg.sender, reward);
+      plu.safeTransfer(msg.sender, reward);
       emit RewardPaid(msg.sender, reward);
     }
   }
 
   function notifyRewardAmount(uint256 reward) external onlyRewardDistribution updateReward(address(0)) {
-    IERC20(token).safeTransferFrom(msg.sender, address(this), reward);
     if (block.timestamp >= periodFinish) {
       rewardRate = reward.div(DURATION);
     } else {
