@@ -328,10 +328,6 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
   // stake visibility is public as overriding LPTokenWrapper's stake() function
   function stake(uint256 amount) public updateReward(msg.sender) {
     require(amount > 0, "Cannot stake 0");
-    if (breaker == false) {
-      require(bptlp.balanceOf(msg.sender) > minimumBPTLP, "<minimumBPTLP");
-      require(voteLock[msg.sender] > block.number, "<block.number");
-    }
     if (voters[msg.sender] == true) {
       votes[msg.sender] = votes[msg.sender].add(amount);
       totalVotes = totalVotes.add(amount);
@@ -347,7 +343,7 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
       totalVotes = totalVotes.sub(amount);
     }
     if (breaker == false) {
-      require(voteLock[msg.sender] < block.number,"!locked");
+      require(voteLock[msg.sender] < block.number, "!locked");
     }
     super.withdraw(amount);
     emit Withdrawn(msg.sender, amount);
@@ -360,8 +356,8 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
 
   function getReward() public updateReward(msg.sender) {
     if (breaker == false) {
-      require(bptlp.balanceOf(msg.sender) > minimum, "<minimum");
-      require(voteLock[msg.sender] > block.number,"!voted");
+      require(bptlp.balanceOf(msg.sender) > minimumBPTLP, "<minimumBPTLP");
+      require(voteLock[msg.sender] > block.number, "!voted");
     }
     uint256 reward = earned(msg.sender);
     if (reward > 0) {
