@@ -31012,12 +31012,12 @@
     "1": {
       "events": {},
       "links": {},
-      "address": "0x1Dc348EFe6EB5D34e884dEda687622C80fF71eAd",
-      "transactionHash": "0x88df80eab40e4e9233a0d842c39f2f36022a7da9c60fcc678116729043df5e34"
+      "address": "0x0C21835E7808964836C27422f1b9c6Bd36e1F050",
+      "transactionHash": "0xff0cd321cb70f2266fb4207cd7f236146b5df54cf448a092a9ed9a95e9a812b5"
     }
   },
   "schemaVersion": "3.2.4",
-  "updatedAt": "2020-09-15T02:43:18.920Z",
+  "updatedAt": "2020-09-16T06:42:08.364Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}
