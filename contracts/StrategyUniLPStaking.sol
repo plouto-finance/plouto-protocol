@@ -46,11 +46,8 @@ contract StrategyUniLPStaking {
   // liquidation path to be used
   address[] public uniswap_uni2weth;
 
-  uint public performanceFee = 500;
+  uint public performanceFee = 600;
   uint constant public performanceMax = 10000;
-
-  uint public withdrawalFee = 50;
-  uint constant public withdrawalMax = 10000;
 
   address public governance;
   address public controller;
@@ -65,11 +62,6 @@ contract StrategyUniLPStaking {
 
   function getName() external pure returns (string memory) {
     return "StrategyUniLPStaking";
-  }
-
-  function setWithdrawalFee(uint _withdrawalFee) external {
-    require(msg.sender == governance, "!governance");
-    withdrawalFee = _withdrawalFee;
   }
 
   function setPerformanceFee(uint _performanceFee) external {
@@ -127,7 +119,9 @@ contract StrategyUniLPStaking {
 
   function _withdrawAll() internal {
     uint _balance = SULPSStakingRewards(pool).balanceOf(address(this));
-    SULPSStakingRewards(pool).withdraw(_balance);
+    if (_balance > 0) {
+      SULPSStakingRewards(pool).withdraw(_balance);
+    }
   }
 
   function harvest() public {

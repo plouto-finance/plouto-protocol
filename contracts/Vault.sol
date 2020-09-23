@@ -11,6 +11,7 @@ interface VaultController {
   function withdraw(address, uint) external;
   function balanceOf(address) external view returns (uint);
   function earn(address, uint) external;
+  function rewards() external view returns (address);
 }
 
 contract Vault is ERC20, ERC20Detailed {
@@ -22,6 +23,9 @@ contract Vault is ERC20, ERC20Detailed {
 
   uint public min = 9500;
   uint public constant max = 10000;
+
+  uint public withdrawalFee = 50;
+  uint constant public withdrawalMax = 10000;
 
   address public governance;
   address public controller;
@@ -43,6 +47,11 @@ contract Vault is ERC20, ERC20Detailed {
   function setMin(uint _min) external {
     require(msg.sender == governance, "!governance");
     min = _min;
+  }
+
+  function setWithdrawalFee(uint _withdrawalFee) external {
+    require(msg.sender == governance, "!governance");
+    withdrawalFee = _withdrawalFee;
   }
 
   function setGovernance(address _governance) public {
@@ -107,7 +116,9 @@ contract Vault is ERC20, ERC20Detailed {
       }
     }
 
-    token.safeTransfer(msg.sender, r);
+    uint _fee = r.mul(withdrawalFee).div(withdrawalMax);
+    token.safeTransfer(VaultController(controller).rewards(), _fee);
+    token.safeTransfer(msg.sender, r.sub(_fee));
   }
 
   function getPricePerFullShare() public view returns (uint) {

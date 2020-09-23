@@ -44,6 +44,10 @@ interface IExecutor {
   function execute(uint, uint, uint, uint) external;
 }
 
+interface PGController {
+  function rewards() external view returns (address);
+}
+
 contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
   /* Fee collection for any other token */
 
@@ -100,11 +104,12 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
 
   address public governance;
 
-  constructor (address _bptlp, address _plu) public LPTokenWrapper(_plu) {
+  constructor (address _bptlp, address _plu, address _controller) public LPTokenWrapper(_plu) {
     governance = tx.origin;
     proposalCount = 0;
     bptlp = IERC20(_bptlp);
     plu = IERC20(_plu);
+    controller = _controller;
   }
 
   function setGovernance(address _governance) public {
@@ -274,8 +279,12 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
 
   IERC20 public bptlp;
   IERC20 public plu;
+  address public controller;
 
   uint256 public constant DURATION = 60 days;
+
+  uint public performanceFee = 600;
+  uint constant public performanceMax = 10000;
 
   uint256 public periodFinish = 0;
   uint256 public rewardRate = 0;
@@ -297,6 +306,11 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
       userRewardPerTokenPaid[account] = rewardPerTokenStored;
     }
     _;
+  }
+
+  function setPerformanceFee(uint _performanceFee) external {
+    require(msg.sender == governance, "!governance");
+    performanceFee = _performanceFee;
   }
 
   function lastTimeRewardApplicable() public view returns (uint256) {
@@ -362,7 +376,9 @@ contract PulotoGovernance is LPTokenWrapper, IRewardDistributionRecipient {
     uint256 reward = earned(msg.sender);
     if (reward > 0) {
       rewards[msg.sender] = 0;
-      plu.safeTransfer(msg.sender, reward);
+      uint256 _fee = reward.mul(performanceFee).div(performanceMax);
+      plu.safeTransfer(PGController(controller).rewards(), _fee);
+      plu.safeTransfer(msg.sender, reward.sub(_fee));
       emit RewardPaid(msg.sender, reward);
     }
   }

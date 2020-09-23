@@ -53,11 +53,8 @@ contract StrategyDForce {
   address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
   address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for df <> weth <> want route
 
-  uint public performanceFee = 500;
+  uint public performanceFee = 600;
   uint constant public performanceMax = 10000;
-
-  uint public withdrawalFee = 50;
-  uint constant public withdrawalMax = 10000;
 
   address public governance;
   address public controller;
@@ -72,11 +69,6 @@ contract StrategyDForce {
 
   function getName() external pure returns (string memory) {
     return "StrategyDForce";
-  }
-
-  function setWithdrawalFee(uint _withdrawalFee) external {
-    require(msg.sender == governance, "!governance");
-    withdrawalFee = _withdrawalFee;
   }
 
   function setPerformanceFee(uint _performanceFee) external {
@@ -118,13 +110,10 @@ contract StrategyDForce {
       _amount = _amount.add(_balance);
     }
 
-    uint _fee = _amount.mul(withdrawalFee).div(withdrawalMax);
-
-    IERC20(want).safeTransfer(SDFController(controller).rewards(), _fee);
     address _vault = SDFController(controller).vaults(address(want));
     require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
-    IERC20(want).safeTransfer(_vault, _amount.sub(_fee));
+    IERC20(want).safeTransfer(_vault, _amount);
   }
 
   // Withdraw all funds, normally used when migrating strategies

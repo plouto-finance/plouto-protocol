@@ -82,11 +82,8 @@ contract StrategyCurveYCRVVoter {
   uint public keepCRV = 1000;
   uint constant public keepCRVMax = 10000;
 
-  uint public performanceFee = 500;
+  uint public performanceFee = 600;
   uint constant public performanceMax = 10000;
-
-  uint public withdrawalFee = 50;
-  uint constant public withdrawalMax = 10000;
 
   address public governance;
   address public controller;
@@ -103,11 +100,6 @@ contract StrategyCurveYCRVVoter {
   function setKeepCRV(uint _keepCRV) external {
     require(msg.sender == governance, "!governance");
     keepCRV = _keepCRV;
-  }
-
-  function setWithdrawalFee(uint _withdrawalFee) external {
-    require(msg.sender == governance, "!governance");
-    withdrawalFee = _withdrawalFee;
   }
 
   function setPerformanceFee(uint _performanceFee) external {
@@ -144,13 +136,10 @@ contract StrategyCurveYCRVVoter {
       _amount = _amount.add(_balance);
     }
 
-    uint _fee = _amount.mul(withdrawalFee).div(withdrawalMax);
-
-    IERC20(want).safeTransfer(SCYCRVVController(controller).rewards(), _fee);
     address _vault = SCYCRVVController(controller).vaults(address(want));
     require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
-    IERC20(want).safeTransfer(_vault, _amount.sub(_fee));
+    IERC20(want).safeTransfer(_vault, _amount);
   }
 
   // Withdraw all funds, normally used when migrating strategies

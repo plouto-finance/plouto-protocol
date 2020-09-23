@@ -5,9 +5,14 @@ import "@openzeppelin/contracts/math/Math.sol";
 import "./IRewardDistributionRecipient.sol";
 import "./LPTokenWrapper.sol";
 
+interface PRController {
+  function rewards() external view returns (address);
+}
+
 contract PloutoRewards is LPTokenWrapper, IRewardDistributionRecipient {
   IERC20 public plu;
   uint256 public constant DURATION = 60 days;
+  address public controller;
 
   uint256 public periodFinish = 0;
   uint256 public rewardRate = 0;
@@ -15,6 +20,9 @@ contract PloutoRewards is LPTokenWrapper, IRewardDistributionRecipient {
   uint256 public rewardPerTokenStored;
   mapping(address => uint256) public userRewardPerTokenPaid;
   mapping(address => uint256) public rewards;
+
+  uint public performanceFee = 600;
+  uint constant public performanceMax = 10000;
 
   event RewardAdded(uint256 reward);
   event Staked(address indexed user, uint256 amount);
@@ -31,8 +39,13 @@ contract PloutoRewards is LPTokenWrapper, IRewardDistributionRecipient {
     _;
   }
 
-  constructor (address _lp, address _plu) public LPTokenWrapper(_lp) {
+  constructor (address _lp, address _plu, address _controller) public LPTokenWrapper(_lp) {
     plu = IERC20(_plu);
+    controller = _controller;
+  }
+
+  function setPerformanceFee(uint _performanceFee) external onlyOwner {
+    performanceFee = _performanceFee;
   }
 
   function lastTimeRewardApplicable() public view returns (uint256) {
@@ -81,7 +94,9 @@ contract PloutoRewards is LPTokenWrapper, IRewardDistributionRecipient {
     uint256 reward = earned(msg.sender);
     if (reward > 0) {
       rewards[msg.sender] = 0;
-      plu.safeTransfer(msg.sender, reward);
+      uint256 _fee = reward.mul(performanceFee).div(performanceMax);
+      plu.safeTransfer(PRController(controller).rewards(), _fee);
+      plu.safeTransfer(msg.sender, reward.sub(_fee));
       emit RewardPaid(msg.sender, reward);
     }
   }

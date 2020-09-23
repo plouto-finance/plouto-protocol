@@ -95,11 +95,8 @@ contract StrategySwerveUSD {
   // liquidation path to be used
   address[] public uniswap_swrv2want;
 
-  uint public performanceFee = 500;
+  uint public performanceFee = 600;
   uint constant public performanceMax = 10000;
-
-  uint public withdrawalFee = 50;
-  uint constant public withdrawalMax = 10000;
 
   address public governance;
   address public controller;
@@ -118,11 +115,6 @@ contract StrategySwerveUSD {
 
   function getName() external pure returns (string memory) {
     return "StrategySwerveUSD";
-  }
-
-  function setWithdrawalFee(uint _withdrawalFee) external {
-    require(msg.sender == governance, "!governance");
-    withdrawalFee = _withdrawalFee;
   }
 
   function setPerformanceFee(uint _performanceFee) external {
@@ -210,13 +202,10 @@ contract StrategySwerveUSD {
       _amount = _amount.add(_balance);
     }
 
-    uint _fee = _amount.mul(withdrawalFee).div(withdrawalMax);
-
-    IERC20(want).safeTransfer(SSUSDController(controller).rewards(), _fee);
     address _vault = SSUSDController(controller).vaults(address(want));
     require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
-    IERC20(want).safeTransfer(_vault, _amount.sub(_fee));
+    IERC20(want).safeTransfer(_vault, _amount);
 
     // invest back the rest
     deposit();
@@ -239,7 +228,10 @@ contract StrategySwerveUSD {
 
   function _withdrawAll() internal {
     // withdraw all from gauge
-    SSUSDGauge(gauge).withdraw(SSUSDGauge(gauge).balanceOf(address(this)));
+    uint _balance = SSUSDGauge(gauge).balanceOf(address(this));
+    if (_balance > 0) {
+      SSUSDGauge(gauge).withdraw(_balance);
+    }
     // convert the swusd to want, we want the entire balance
     swusdToWant(uint256(~0));
   }
@@ -279,7 +271,8 @@ contract StrategySwerveUSD {
   }
 
   function balanceOfPool() public view returns (uint) {
-    return SSUSDGauge(gauge).balanceOf(address(this));
+    uint256 swusdBalance = SSUSDGauge(gauge).balanceOf(address(this));
+    return ISwerveFi(curve).calc_withdraw_one_coin(swusdBalance, int128(tokenIndex));
   }
 
   function balanceOf() public view returns (uint) {
