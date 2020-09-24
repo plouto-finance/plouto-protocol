@@ -8,18 +8,18 @@ module.exports = async function(deployer, network) {
   await deployer;
   await deployer.deploy(
     Vault,
-    '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     Controller.address);
   await deployer.deploy(
     StrategySwerveUSD,
-    0,
+    1,
     Controller.address);
   const contractInstance = await deployer.deploy(Controller, { overwrite: false });
   await contractInstance.setStrategy(
-    '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     StrategySwerveUSD.address);
   await contractInstance.setVault(
-    '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     Vault.address);
   await deployer.deploy(
     PloutoRewards,
