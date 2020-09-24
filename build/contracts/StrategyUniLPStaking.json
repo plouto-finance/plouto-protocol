@@ -18007,7 +18007,8 @@
   },
   "networks": {},
   "schemaVersion": "3.2.5",
-  "updatedAt": "2020-09-24T03:32:51.135Z",
+  "updatedAt": "2020-09-24T05:11:43.295Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {}
   },
